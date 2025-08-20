@@ -4,6 +4,10 @@ public class Ville {
     private String nom;
     private int nbHabitants;
 
+    // Constructeur vide obligatoire pour Jackson
+    public Ville() {
+    }
+
     public Ville(String nom, int nbHabitants) {
         this.nom = nom;
         this.nbHabitants = nbHabitants;

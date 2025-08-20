@@ -2,11 +2,11 @@ package fr.diginamic.hello.controleurs;
 
 import fr.diginamic.hello.model.Ville;
 import fr.diginamic.hello.services.VilleService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/villes")
@@ -22,5 +22,17 @@ public class VilleControleur {
     @GetMapping
     public List<Ville> extractVilles() {
         return service.getVilles();
+    }
+
+    // Étape 1 : méthode POST pour insérer une ville
+    @PostMapping
+    public ResponseEntity<String> addVille(@RequestBody Ville ville) {
+        boolean added = service.addVille(ville);
+
+        if (added) {
+            return ResponseEntity.ok("Ville insérée avec succès");
+        } else {
+            return ResponseEntity.badRequest().body("La ville existe déjà");
+        }
     }
 }
