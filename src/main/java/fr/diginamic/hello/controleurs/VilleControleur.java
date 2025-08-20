@@ -20,7 +20,7 @@ public class VilleControleur {
     }
 
     @GetMapping
-    public List<Ville> getVilles() {
+    public List<Ville> extractVilles() {
         return service.getVilles();
     }
 }
