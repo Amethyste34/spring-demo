@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/villes")
@@ -20,11 +19,17 @@ public class VilleControleur {
     }
 
     @GetMapping
-    public List<Ville> extractVilles() {
-        return service.getVilles();
+    public List<Ville> getAllVilles() {
+        return service.getAllVilles();
     }
 
-    // Étape 1 : méthode POST pour insérer une ville
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getVilleById(@PathVariable int id) {
+        return service.getVilleById(id)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().body("Ville introuvable"));
+    }
+
     @PostMapping
     public ResponseEntity<String> addVille(@RequestBody Ville ville) {
         boolean added = service.addVille(ville);
@@ -33,6 +38,26 @@ public class VilleControleur {
             return ResponseEntity.ok("Ville insérée avec succès");
         } else {
             return ResponseEntity.badRequest().body("La ville existe déjà");
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateVille(@PathVariable int id, @RequestBody Ville newVille) {
+        boolean updated = service.updateVille(id, newVille);
+        if (updated) {
+            return ResponseEntity.ok("Ville modifiée avec succès");
+        } else {
+            return ResponseEntity.badRequest().body("Ville introuvable");
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteVille(@PathVariable int id) {
+        boolean deleted = service.deleteVille(id);
+        if (deleted) {
+            return ResponseEntity.ok("Ville supprimée avec succès");
+        } else {
+            return ResponseEntity.badRequest().body("Ville introuvable");
         }
     }
 }
