@@ -2,9 +2,14 @@ package fr.diginamic.hello.controleurs;
 
 import fr.diginamic.hello.model.Ville;
 import fr.diginamic.hello.services.VilleService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.validation.Validator;
 import java.util.List;
 
 /**
@@ -27,6 +32,10 @@ public class VilleControleur {
 
     /** Service pour gérer la logique métier des villes */
     private final VilleService service;
+
+    /** Injection du validator */
+    @Autowired
+    private Validator validator;
 
     /**
      * Constructeur de VilleControleur.
@@ -68,10 +77,18 @@ public class VilleControleur {
      * Ajoute une nouvelle ville.
      *
      * @param ville l'objet {@link Ville} à ajouter
-     * @return ResponseEntity avec un message indiquant si l'ajout a réussi ou si la ville existe déjà
+     * @param result le résultat de la validation
+     * @return ResponseEntity avec un message indiquant si l'ajout a réussi ou si la validation échoue
      */
     @PostMapping
-    public ResponseEntity<String> addVille(@RequestBody Ville ville) {
+    public ResponseEntity<String> addVille(@Valid @RequestBody Ville ville, BindingResult result) {
+        if (result.hasErrors()) {
+            // Récupération des messages d'erreur
+            StringBuilder errors = new StringBuilder();
+            result.getAllErrors().forEach(err -> errors.append(err.getDefaultMessage()).append("; "));
+            return ResponseEntity.badRequest().body(errors.toString());
+        }
+
         boolean added = service.addVille(ville);
 
         if (added) {
@@ -90,6 +107,21 @@ public class VilleControleur {
      */
     @PutMapping("/{id}")
     public ResponseEntity<String> updateVille(@PathVariable int id, @RequestBody Ville newVille) {
+        // on force l’ID à partir du path
+        newVille.setId(id);
+
+        // ⚡ validation manuelle
+        Errors result = new BeanPropertyBindingResult(newVille, "ville");
+        validator.validate(newVille, result);
+
+        if (result.hasErrors()) {
+            // On récupère le premier message d’erreur
+            return ResponseEntity.badRequest().body(
+                    result.getFieldErrors().get(0).getCode() + " " +
+                            result.getFieldErrors().get(0).getDefaultMessage()
+            );
+        }
+
         boolean updated = service.updateVille(id, newVille);
         if (updated) {
             return ResponseEntity.ok("Ville modifiée avec succès");

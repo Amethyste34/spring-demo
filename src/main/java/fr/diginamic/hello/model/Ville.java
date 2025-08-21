@@ -1,5 +1,9 @@
 package fr.diginamic.hello.model;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 /**
  * Classe représentant une ville.
  * <p>
@@ -19,9 +23,12 @@ public class Ville {
     private int id;
 
     /** Nom de la ville */
+    @NotNull(message = "Le nom de la ville ne doit pas être nul")
+    @Size(min = 2, message = "Le nom de la ville doit contenir au moins 2 caractères")
     private String nom;
 
     /** Nombre d'habitants de la ville */
+    @Min(value = 1, message = "Le nombre d'habitants doit être supérieur ou égal à 1")
     private int nbHabitants;
 
     /**
